@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     gnupg \
     build-essential \
+    sudo \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -51,21 +52,28 @@ RUN useradd -m -s /bin/bash linuxbrew \
  && chown -R linuxbrew:linuxbrew /home/linuxbrew
 
 USER linuxbrew
-RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+ && cd /home/linuxbrew/.linuxbrew/Homebrew \
+ && git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew \
+ && /home/linuxbrew/.linuxbrew/bin/brew update --force
 USER root
 
-# Add Homebrew to PATH for all users
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+# Add Homebrew to PATH for all users (wrapper comes first to intercept root calls)
+ENV PATH="/usr/local/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+
+# Copy brew wrapper that allows root to run brew by delegating to linuxbrew user
+COPY brew-wrapper.sh /usr/local/bin/brew
+RUN chmod +x /usr/local/bin/brew
 
 # Verify brew is available and install gcc (needed for compiling some brew packages)
 # Must run as linuxbrew user - Homebrew refuses to run as root
 USER linuxbrew
-RUN brew --version && brew install gcc
+RUN /home/linuxbrew/.linuxbrew/bin/brew --version && /home/linuxbrew/.linuxbrew/bin/brew install gcc
 USER root
 
 # Install OpenClaw globally
 RUN npm config set fund false && npm config set audit false \
- && npm install -g openclaw@2026.1.30
+ && npm install -g openclaw@2026.2.1
 
 COPY run.sh /run.sh
 COPY oc_config_helper.py /oc_config_helper.py
