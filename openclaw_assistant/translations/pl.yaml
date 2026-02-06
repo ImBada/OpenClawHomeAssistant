@@ -50,3 +50,7 @@ configuration:
   allow_insecure_auth:
     name: Zezwól na niezabezpieczone uwierzytelnianie HTTP
     description: Zezwól na uwierzytelnianie HTTP dla dostępu do gateway w sieci LAN. UWAGA - Włącz tylko jeśli używasz HTTP (nie HTTPS) dla gateway_public_url. Wymagane dla dostępu przez przeglądarkę przez HTTP.
+  
+  gateway_mode:
+    name: Tryb Gateway
+    description: Tryb działania gateway - local (uruchom gateway lokalnie, zalecane) lub remote (połącz się ze zdalnym gateway)
