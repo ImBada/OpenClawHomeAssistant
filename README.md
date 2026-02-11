@@ -1,5 +1,6 @@
 # OpenClaw Assistant – Home Assistant Add-on
 
+## [Join our Discord Server!](https://discord.gg/Nx4H3XmY)
 ![OpenClaw Assistant](https://github.com/techartdev/OpenClawHomeAssistant/blob/main/oca_addon.png?raw=true)
 
 This repository contains a Home Assistant add-on that runs **OpenClaw** inside **Home Assistant OS (HAOS)**.
