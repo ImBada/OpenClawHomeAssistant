@@ -75,6 +75,11 @@ options:
   # Default is false for security.
   allow_insecure_auth: false
 
+  # Virtual display for GUI browser automation on headless HAOS
+  enable_xvfb: true
+  xvfb_display: ":99"
+  xvfb_screen: "1920x1080x24"
+
 
 schema:
   timezone: str
@@ -95,3 +100,6 @@ schema:
   enable_openai_api: bool?
   allow_insecure_auth: bool?
 
+  enable_xvfb: bool?
+  xvfb_display: str?
+  xvfb_screen: str?

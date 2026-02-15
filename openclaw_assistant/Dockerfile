@@ -56,6 +56,7 @@ RUN npm install -g pnpm && pnpm -v
 RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     chromium-driver \
+    xvfb \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 

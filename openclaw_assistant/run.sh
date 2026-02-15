@@ -51,6 +51,10 @@ GATEWAY_PORT=$(jq -r '.gateway_port // 18789' "$OPTIONS_FILE")
 ENABLE_OPENAI_API=$(jq -r '.enable_openai_api // false' "$OPTIONS_FILE")
 ALLOW_INSECURE_AUTH=$(jq -r '.allow_insecure_auth // false' "$OPTIONS_FILE")
 
+ENABLE_XVFB=$(jq -r '.enable_xvfb // true' "$OPTIONS_FILE")
+XVFB_DISPLAY=$(jq -r '.xvfb_display // ":99"' "$OPTIONS_FILE")
+XVFB_SCREEN=$(jq -r '.xvfb_screen // "1920x1080x24"' "$OPTIONS_FILE")
+
 export TZ="$TZNAME"
 
 # Reduce risk of secrets ending up in logs
@@ -66,6 +70,27 @@ export OPENCLAW_WORKSPACE_DIR=/config/clawd
 export XDG_CONFIG_HOME=/config
 
 mkdir -p /config/.openclaw /config/clawd /config/keys /config/secrets
+
+# ------------------------------------------------------------------------------
+# Optional: Xvfb virtual display (for GUI-required automation on headless hosts)
+# ------------------------------------------------------------------------------
+if [ "$ENABLE_XVFB" = "true" ]; then
+  echo "INFO: Starting Xvfb on display $XVFB_DISPLAY (screen $XVFB_SCREEN)"
+  export DISPLAY="$XVFB_DISPLAY"
+
+  DISP_NUM="${XVFB_DISPLAY#:}"
+
+  # Clean stale lock (safe in container; prevents "server already running" false positives)
+  rm -f "/tmp/.X${DISP_NUM}-lock" 2>/dev/null || true
+
+  # Start only if not already running
+  if ! pgrep -x Xvfb >/dev/null 2>&1; then
+    Xvfb "$XVFB_DISPLAY" -screen 0 "$XVFB_SCREEN" -ac +extension RANDR >/tmp/xvfb.log 2>&1 &
+    sleep 0.5
+  fi
+
+  echo "INFO: DISPLAY=$DISPLAY"
+fi
 
 # ------------------------------------------------------------------------------
 # Sync built-in OpenClaw skills from image to persistent storage
